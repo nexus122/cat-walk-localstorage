@@ -4,6 +4,11 @@ let pixelsMove = 10;
 let volume = 0.5
 let walkForwards = true;
 
+
+// Configuracion del Dom
+let btnMove = document.querySelector('#bailar');
+let btnStop = document.querySelector('#parar');
+
 // Variables globales
 const img = document.querySelector('img');
 img.style.left = '0px';
@@ -13,7 +18,35 @@ const audio = new Audio('./lambada.mp3');
 audio.volume = volume;
 
 // escuchar evento submit de formulario
-document.querySelector("form").addEventListener("submit", procesarValoresFormulario);
+document.querySelector("form").addEventListener('submit', procesarValoresFormulario);
+document.querySelector('#velocidad').addEventListener('input', procesarValoresFormulario);
+document.querySelector('#volumen').addEventListener('input', procesarValoresFormulario);
+// Gestionar localStorage y sobrescribir variables de estado.
+/* Recuperamos moveCat */
+if(localStorage.moveCat){
+    moveCat = JSON.parse(localStorage.moveCat);
+    if(moveCat){
+        btnMove.disabled = true;
+        btnStop.disabled = false;
+        audio.play();
+    }else{
+        btnStop.disabled = true;
+        btnMove.disabled = false;
+    }
+}
+
+/* Recuperamos pixelsMove */
+if(localStorage.pixelsMove){
+    pixelsMove = JSON.parse(localStorage.pixelsMove);
+    document.forms["catConf"].elements["velocidad"].value = pixelsMove;
+}
+
+/* Recuperamos el volumen */
+if(localStorage.volume){
+    volume = JSON.parse(localStorage.volume);
+    console.log('Recuperamos el volumen: ', volume);
+    document.forms['catConf'].elements['volumen'].value = volume;
+}
 
 // evento click al botón Bailar!
 // Ejercicio 1
@@ -22,6 +55,14 @@ document.querySelector("form").addEventListener("submit", procesarValoresFormula
 // 2. Actualizar la variable de estado 'moveCat' a true
 // 3. Ejecutar el método .play del objeto 'audio'
 
+// Metodo para empezar a bailar y empezar la musica.
+btnMove.addEventListener('click',function(){    
+    btnMove.disabled = true;
+    btnStop.disabled = false;
+    moveCat = true;
+    localStorage.moveCat = moveCat
+    audio.play();
+})
 
 
 // evento click al botón Parar!
@@ -30,6 +71,18 @@ document.querySelector("form").addEventListener("submit", procesarValoresFormula
 // 1. Asociar el evento "click" al botón "Parar"
 // 2. Actualizar la variable de estado 'moveCat' a false
 // 3. Ejecutar el método .pause del objeto 'audio'
+
+
+// Metodo para parar de bailar y parar la musica.
+btnStop.addEventListener('click', function(){
+    btnStop.disabled = true;
+    btnMove.disabled = false;
+    moveCat = false;
+    localStorage.moveCat = moveCat
+
+    audio.pause();
+    audio.currentTime = 0;
+})
 
 
 function catWalk() {
@@ -43,15 +96,14 @@ function catWalk() {
     if (!walkForwards && (currentLeft <= 0)) {
         walkForwards = true;
         img.style.transform = "";
-
     }
 
     // Ejercicio 4
 
     if (walkForwards) {
-        img.style.left = (currentLeft + 10) + 'px';
+        img.style.left = (currentLeft + pixelsMove) + 'px';
     } else {
-        img.style.left = (currentLeft - 10) + 'px';
+        img.style.left = (currentLeft - pixelsMove) + 'px';
     }
 }
 
@@ -63,11 +115,17 @@ function procesarValoresFormulario(event) {
 
     // acceder al input que tiene el name="velocidad"
     const velocidad = document.forms["catConf"].elements["velocidad"].value;
-    console.log("nueva velocidad", velocidad);
-
+    console.log(parseInt(velocidad));
+    pixelsMove = parseInt(velocidad);
+    
     // Ejercicio 4
+    localStorage.pixelsMove = parseInt(pixelsMove);
 
     // Ejercicio 5
+    const volumen = parseFloat(document.forms['catConf'].elements['volumen'].value);
+    console.log(volumen);
+    localStorage.volume = volumen;
+    audio.volume = volumen;
 
 }
 
